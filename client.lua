@@ -9,6 +9,7 @@ local choosingSpawn = false
 local Houses = {}
 local cam = nil
 local cam2 = nil
+local Apartments = {}
 
 -- Functions
 
@@ -36,7 +37,8 @@ RegisterNetEvent('qb-spawn:client:openUI', function(value)
     Wait(1000)
     DoScreenFadeIn(250)
     QBCore.Functions.GetPlayerData(function(PlayerData)
-        cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", PlayerData.position.x, PlayerData.position.y, PlayerData.position.z + camZPlus1, -85.00, 0.00, 0.00, 100.00, false, 0)
+        cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", PlayerData.position.x, PlayerData.position.y,
+            PlayerData.position.z + camZPlus1, -85.00, 0.00, 0.00, 100.00, false, 0)
         SetCamActive(cam, true)
         RenderScriptCams(true, false, 1, true, true)
     end)
@@ -44,9 +46,9 @@ RegisterNetEvent('qb-spawn:client:openUI', function(value)
     SetDisplay(value)
 end)
 
-RegisterNetEvent('qb-houses:client:setHouseConfig', function(houseConfig)
-    Houses = houseConfig
-end)
+-- RegisterNetEvent('qb-houses:client:setHouseConfig', function(houseConfig)
+--     Houses = houseConfig
+-- end)
 
 RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
     if not new then
@@ -54,11 +56,22 @@ RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
             local myHouses = {}
             if houses ~= nil then
                 for i = 1, (#houses), 1 do
-                    myHouses[#myHouses+1] = {
-                        house = houses[i].house,
-                        label = Houses[houses[i].house].adress,
+                    Houses[houses[i].identifier] = houses[i]
+                    myHouses[#myHouses + 1] = {
+                        house = houses[i].identifier,
+                        label = houses[i].name,
                     }
                 end
+            end
+
+            for i = 1, #apps, 1 do
+                Houses[apps[i].identifier] = {
+                    entry = apps[i].entry,
+                }
+                myHouses[#myHouses + 1] = {
+                    house = apps[i].identifier,
+                    label = apps[i].name,
+                }
             end
 
             Wait(500)
@@ -91,7 +104,8 @@ RegisterNUICallback("exit", function(_, cb)
 end)
 
 local function SetCam(campos)
-    cam2 = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", campos.x, campos.y, campos.z + camZPlus1, 300.00,0.00,0.00, 110.00, false, 0)
+    cam2 = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", campos.x, campos.y, campos.z + camZPlus1, 300.00, 0.00, 0.00,
+        110.00, false, 0)
     PointCamAtCoord(cam2, campos.x, campos.y, campos.z + pointCamCoords)
     SetCamActiveWithInterp(cam2, cam, cam1Time, true, true)
     if DoesCamExist(cam) then
@@ -99,7 +113,8 @@ local function SetCam(campos)
     end
     Wait(cam1Time)
 
-    cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", campos.x, campos.y, campos.z + camZPlus2, 300.00,0.00,0.00, 110.00, false, 0)
+    cam = CreateCamWithParams("DEFAULT_SCRIPTED_CAMERA", campos.x, campos.y, campos.z + camZPlus2, 300.00, 0.00, 0.00,
+        110.00, false, 0)
     PointCamAtCoord(cam, campos.x, campos.y, campos.z + pointCamCoords2)
     SetCamActiveWithInterp(cam, cam2, cam2Time, true, true)
     SetEntityCoords(PlayerPedId(), campos.x, campos.y, campos.z)
@@ -192,7 +207,11 @@ RegisterNUICallback('spawnplayer', function(data, cb)
         PostSpawnPlayer()
     elseif type == "house" then
         PreSpawnPlayer()
-        TriggerEvent('qb-houses:client:enterOwnedHouse', location)
+        if Houses[location].type ~= 'mlo' then
+            TriggerEvent('Housing:client:EnterHome', location)
+        else
+            SetEntityCoords(ped, Houses[location].entry.x, Houses[location].entry.y, Houses[location].entry.z)
+        end
         TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
         TriggerEvent('QBCore:Client:OnPlayerLoaded')
         TriggerServerEvent('qb-houses:server:SetInsideMeta', 0, false)
