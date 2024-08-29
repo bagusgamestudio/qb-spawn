@@ -133,11 +133,16 @@ RegisterNUICallback('setCam', function(data, cb)
             SetCam(PlayerData.position)
         end)
     elseif type == "house" then
-        SetCam(Houses[location].coords.enter)
+        SetCam(Houses[location].entry)
     elseif type == "normal" then
         SetCam(QB.Spawns[location].coords)
     elseif type == "appartment" then
-        SetCam(Apartments.Locations[location].coords.enter)
+        if not Apartments[location] then
+            Apartments[location] = exports.bcs_housing:GetHome(location)
+            SetCam(Apartments[location].entry or Apartments[location].properties.entry)
+        else
+            SetCam(Apartments[location].entry or Apartments[location].properties.entry)
+        end
     end
     cb('ok')
 end)
