@@ -57,10 +57,12 @@ RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
             if houses ~= nil then
                 for i = 1, (#houses), 1 do
                     Houses[houses[i].identifier] = houses[i]
-                    myHouses[#myHouses + 1] = {
-                        house = houses[i].identifier,
-                        label = houses[i].name,
-                    }
+                    if houses[i].complex ~= 'Apartment' then
+                        myHouses[#myHouses + 1] = {
+                            house = houses[i].identifier,
+                            label = houses[i].name,
+                        }
+                    end
                 end
             end
 
