@@ -66,14 +66,16 @@ RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
                 end
             end
 
-            for i = 1, #apps, 1 do
-                Houses[apps[i].identifier] = {
-                    entry = apps[i].entry,
-                }
-                myHouses[#myHouses + 1] = {
-                    house = apps[i].identifier,
-                    label = apps[i].name,
-                }
+            if apps then
+                for i = 1, #apps, 1 do
+                    Houses[apps[i].identifier] = {
+                        entry = apps[i].entry,
+                    }
+                    myHouses[#myHouses + 1] = {
+                        house = apps[i].identifier,
+                        label = apps[i].name,
+                    }
+                end
             end
 
             Wait(500)
