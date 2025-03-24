@@ -9,6 +9,7 @@ local choosingSpawn = false
 local Houses = {}
 local cam = nil
 local cam2 = nil
+local isNew = false
 local Apartments = {}
 
 -- Functions
@@ -50,7 +51,8 @@ end)
 --     Houses = houseConfig
 -- end)
 
-RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
+RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps, useStarterApt)
+    isNew = new
     if not new then
         QBCore.Functions.TriggerCallback('qb-spawn:server:getOwnedHouses', function(houses)
             local myHouses = {}
@@ -86,7 +88,7 @@ RegisterNetEvent('qb-spawn:client:setupSpawns', function(cData, new, apps)
                 isNew = new
             })
         end, cData.citizenid)
-    elseif new then
+    elseif new and useStarterApt then
         SendNUIMessage({
             action = "setupAppartements",
             locations = apps,
@@ -214,6 +216,9 @@ RegisterNUICallback('spawnplayer', function(data, cb)
         TriggerServerEvent('QBCore:Server:OnPlayerLoaded')
         TriggerEvent('QBCore:Client:OnPlayerLoaded')
         PostSpawnPlayer()
+        if isNew then
+            TriggerEvent('qb-clothes:client:CreateFirstCharacter')
+        end
     elseif type == "house" then
         PreSpawnPlayer()
         if Houses[location].type ~= 'mlo' then
@@ -226,6 +231,9 @@ RegisterNUICallback('spawnplayer', function(data, cb)
         TriggerServerEvent('qb-houses:server:SetInsideMeta', 0, false)
         TriggerServerEvent('qb-apartments:server:SetInsideMeta', 0, 0, false)
         PostSpawnPlayer()
+        if isNew then
+            TriggerEvent('qb-clothes:client:CreateFirstCharacter')
+        end
     elseif type == "normal" then
         local pos = QB.Spawns[location].coords
         PreSpawnPlayer()
@@ -238,6 +246,9 @@ RegisterNUICallback('spawnplayer', function(data, cb)
         SetEntityCoords(ped, pos.x, pos.y, pos.z)
         SetEntityHeading(ped, pos.w)
         PostSpawnPlayer()
+        if isNew then
+            TriggerEvent('qb-clothes:client:CreateFirstCharacter')
+        end
     end
     cb('ok')
 end)
