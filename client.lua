@@ -196,6 +196,11 @@ RegisterNUICallback('spawnplayer', function(data, cb)
     local ped = PlayerPedId()
     local PlayerData = QBCore.Functions.GetPlayerData()
     local insideMeta = PlayerData.metadata["inside"]
+    local homeId = exports.bcs_housing:GetLastProperty()
+    if homeId then
+        TriggerEvent('Housing:client:ExitHome', homeId)
+        Wait(1000)
+    end
     if type == "current" then
         PreSpawnPlayer()
         QBCore.Functions.GetPlayerData(function(pd)
